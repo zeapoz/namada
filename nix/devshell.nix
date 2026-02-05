@@ -1,23 +1,19 @@
 {
-  perSystem = {pkgs, ...}: {
-    devShells.default = with pkgs;
-      pkgs.mkShell {
-        packages = [
-          rustup # Namada uses RUSTUP_TOOLCHAIN during build process.
-          gnumake
+  perSystem = {
+    self',
+    pkgs,
+    ...
+  }: {
+    devShells.default = pkgs.mkShell {
+      inputsFrom = [self'.packages.default];
 
-          # Build dependencies.
-          openssl
-          pkg-config
-          protobuf
-          rocksdb
-          systemd # libudev.
-        ];
+      # Namada uses RUSTUP_TOOLCHAIN during build process, fails if not set.
+      RUSTUP_TOOLCHAIN = "";
 
-        LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
+      LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
 
-        ROCKSDB_LIB_DIR = "${pkgs.rocksdb}/lib";
-        ROCKSDB_INCLUDE_DIR = "${pkgs.rocksdb}/include";
-      };
+      ROCKSDB_LIB_DIR = "${pkgs.rocksdb}/lib";
+      ROCKSDB_INCLUDE_DIR = "${pkgs.rocksdb}/include";
+    };
   };
 }
