@@ -1,14 +1,20 @@
 {
-  perSystem = {pkgs, ...}: let
+  perSystem = {
+    pkgs,
+    env,
+    ...
+  }: let
     pname = "namada";
-    lockFile = ../Cargo.lock;
 
-    inherit ((builtins.fromTOML (builtins.readFile ../Cargo.toml)).workspace.package) version;
+    cargoToml = builtins.fromTOML (builtins.readFile ../Cargo.toml);
+    lockFile = ../Cargo.lock;
 
     rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ../rust-toolchain.toml;
   in {
     packages.default = pkgs.rustPlatform.buildRustPackage {
-      inherit pname version;
+      inherit pname env;
+      inherit (cargoToml.package) version;
+
       src = ../.;
 
       cargoLock = {
@@ -30,14 +36,6 @@
 
       # Disable the check phase as Namada depends on some compiled WASM modules being present.
       doCheck = false;
-
-      # Namada uses RUSTUP_TOOLCHAIN during build process, fails if not set.
-      RUSTUP_TOOLCHAIN = "";
-
-      LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
-
-      ROCKSDB_LIB_DIR = "${pkgs.rocksdb}/lib";
-      ROCKSDB_INCLUDE_DIR = "${pkgs.rocksdb}/include";
     };
   };
 }
