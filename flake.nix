@@ -15,7 +15,7 @@
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
-      imports = [./nix/env.nix ./nix/devshell.nix ./nix/packages.nix];
+      imports = [./nix/env.nix ./nix/devshell.nix ./nix/pkgs ./nix/pkgs/cometbft.nix];
 
       systems = ["x86_64-linux"];
 

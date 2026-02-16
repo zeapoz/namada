@@ -1,13 +1,14 @@
 {
   perSystem = {
+    self',
     pkgs,
     env,
     ...
   }: let
     pname = "namada";
 
-    cargoToml = builtins.fromTOML (builtins.readFile ../Cargo.toml);
-    lockFile = ../Cargo.lock;
+    cargoToml = builtins.fromTOML (builtins.readFile ../../Cargo.toml);
+    lockFile = ../../Cargo.lock;
   in {
     packages.default = pkgs.rustPlatform.buildRustPackage {
       inherit pname env;
@@ -28,6 +29,8 @@
         pkg-config
         protobuf
         python3
+
+        self'.packages.cometbft
       ];
 
       buildInputs = with pkgs; [
