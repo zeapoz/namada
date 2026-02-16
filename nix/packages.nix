@@ -8,12 +8,10 @@
 
     cargoToml = builtins.fromTOML (builtins.readFile ../Cargo.toml);
     lockFile = ../Cargo.lock;
-
-    rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ../rust-toolchain.toml;
   in {
     packages.default = pkgs.rustPlatform.buildRustPackage {
       inherit pname env;
-      inherit (cargoToml.package) version;
+      inherit (cargoToml.workspace.package) version;
 
       src = ../.;
 
@@ -22,10 +20,14 @@
       };
 
       nativeBuildInputs = with pkgs; [
-        rustToolchain
+        binaryen # wasm-opt.
+        blst
+        clang.cc # Has to be unwrapped as we're targeting WASM.
+        rustup
         gnumake
         pkg-config
         protobuf
+        python3
       ];
 
       buildInputs = with pkgs; [
@@ -34,6 +36,7 @@
         systemd # libudev.
       ];
 
+      # TODO: Remove this once we're using a proper build system.
       # Disable the check phase as Namada depends on some compiled WASM modules being present.
       doCheck = false;
     };
