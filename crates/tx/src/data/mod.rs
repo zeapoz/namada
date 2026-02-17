@@ -1,5 +1,8 @@
 //! Data-Types that are used in transactions.
 
+/// airdrop claim transaction
+pub mod airdrop;
+
 pub mod eval_vp;
 /// txs to manage pgf
 pub mod pgf;
@@ -584,7 +587,7 @@ pub enum TxType {
 }
 
 impl TxType {
-    /// Produce a SHA-256 hash of this header  
+    /// Produce a SHA-256 hash of this header
     pub fn hash<'a>(&self, hasher: &'a mut Sha256) -> &'a mut Sha256 {
         hasher.update(self.serialize_to_vec());
         hasher

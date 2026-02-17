@@ -1714,6 +1714,25 @@ pub mod cmds {
     }
 
     #[derive(Clone, Debug)]
+    pub struct ClaimAirdrop(pub args::ClaimAirdrop<args::CliTypes>);
+
+    impl SubCmd for ClaimAirdrop {
+        const CMD: &'static str = "claim-airdrop";
+
+        fn parse(matches: &ArgMatches) -> Option<Self> {
+            matches
+                .subcommand_matches(Self::CMD)
+                .map(|matches| ClaimAirdrop(args::ClaimAirdrop::parse(matches)))
+        }
+
+        fn def() -> App {
+            App::new(Self::CMD)
+                .about(wrap!("Claim a Zcash airdrop."))
+                .add_args::<args::ClaimAirdrop<args::CliTypes>>()
+        }
+    }
+
+    #[derive(Clone, Debug)]
     pub struct Redelegate(pub args::Redelegate<args::CliTypes>);
 
     impl SubCmd for Redelegate {
@@ -3423,7 +3442,7 @@ pub mod args {
     pub use namada_sdk::tx::{
         TX_BECOME_VALIDATOR_WASM, TX_BOND_WASM, TX_BRIDGE_POOL_WASM,
         TX_CHANGE_COMMISSION_WASM, TX_CHANGE_CONSENSUS_KEY_WASM,
-        TX_CHANGE_METADATA_WASM, TX_CLAIM_REWARDS_WASM,
+        TX_CHANGE_METADATA_WASM, TX_CLAIM_AIRDROP_WASM, TX_CLAIM_REWARDS_WASM,
         TX_DEACTIVATE_VALIDATOR_WASM, TX_IBC_WASM, TX_INIT_ACCOUNT_WASM,
         TX_INIT_PROPOSAL, TX_REACTIVATE_VALIDATOR_WASM, TX_REDELEGATE_WASM,
         TX_RESIGN_STEWARD, TX_REVEAL_PK, TX_TRANSFER_WASM, TX_UNBOND_WASM,
@@ -6568,6 +6587,31 @@ pub mod args {
                 tx,
                 validator,
                 source,
+                tx_code_path,
+            }
+        }
+
+        fn def(app: App) -> App {
+            app.add_args::<Tx<CliTypes>>()
+                .arg(VALIDATOR.def().help(wrap!("Validator address.")))
+                .arg(SOURCE_OPT.def().help(wrap!(
+                    "Source address for claiming rewards for a bond. For \
+                     self-bonds, the validator is also the source."
+                )))
+        }
+    }
+
+    impl Args for ClaimAirdrop<CliTypes> {
+        fn parse(matches: &ArgMatches) -> Self {
+            let tx = Tx::parse(matches);
+            let source = SOURCE.parse(matches);
+            let raw_amount = AMOUNT.parse(matches);
+            let amount = InputAmount::Unvalidated(raw_amount);
+            let tx_code_path = PathBuf::from(TX_CLAIM_AIRDROP_WASM);
+            Self {
+                tx,
+                source,
+                amount,
                 tx_code_path,
             }
         }
