@@ -260,6 +260,8 @@ pub mod cmds {
                 .subcommand(Withdraw::def().display_order(2))
                 .subcommand(Redelegate::def().display_order(2))
                 .subcommand(ClaimRewards::def().display_order(2))
+                // TODO: Move this out of PoS section
+                .subcommand(ClaimAirdrop::def().display_order(2))
                 .subcommand(TxCommissionRateChange::def().display_order(2))
                 .subcommand(TxChangeConsensusKey::def().display_order(2))
                 .subcommand(TxMetadataChange::def().display_order(2))
@@ -357,6 +359,7 @@ pub mod cmds {
             let withdraw = Self::parse_with_ctx(matches, Withdraw);
             let redelegate = Self::parse_with_ctx(matches, Redelegate);
             let claim_rewards = Self::parse_with_ctx(matches, ClaimRewards);
+            let claim_airdrop = Self::parse_with_ctx(matches, ClaimAirdrop);
             let query_epoch = Self::parse_with_ctx(matches, QueryEpoch);
             let query_next_epoch_info =
                 Self::parse_with_ctx(matches, QueryNextEpochInfo);
@@ -433,6 +436,7 @@ pub mod cmds {
                 .or(withdraw)
                 .or(redelegate)
                 .or(claim_rewards)
+                .or(claim_airdrop)
                 .or(add_to_eth_bridge_pool)
                 .or(tx_update_steward_commission)
                 .or(tx_resign_steward)
@@ -529,6 +533,7 @@ pub mod cmds {
         Unbond(Unbond),
         Withdraw(Withdraw),
         ClaimRewards(ClaimRewards),
+        ClaimAirdrop(ClaimAirdrop),
         Redelegate(Redelegate),
         AddToEthBridgePool(AddToEthBridgePool),
         TxUpdateStewardCommission(TxUpdateStewardCommission),
@@ -6601,6 +6606,25 @@ pub mod args {
         }
     }
 
+    impl CliToSdk<ClaimAirdrop<SdkTypes>> for ClaimAirdrop<CliTypes> {
+        type Error = std::io::Error;
+
+        fn to_sdk(
+            self,
+            ctx: &mut Context,
+        ) -> Result<ClaimAirdrop<SdkTypes>, Self::Error> {
+            let tx = self.tx.to_sdk(ctx)?;
+            let chain_ctx = ctx.borrow_chain_or_exit();
+
+            Ok(ClaimAirdrop::<SdkTypes> {
+                tx,
+                source: chain_ctx.get(&self.source),
+                amount: self.amount,
+                tx_code_path: self.tx_code_path.to_path_buf(),
+            })
+        }
+    }
+
     impl Args for ClaimAirdrop<CliTypes> {
         fn parse(matches: &ArgMatches) -> Self {
             let tx = Tx::parse(matches);
@@ -6618,11 +6642,10 @@ pub mod args {
 
         fn def(app: App) -> App {
             app.add_args::<Tx<CliTypes>>()
-                .arg(VALIDATOR.def().help(wrap!("Validator address.")))
-                .arg(SOURCE_OPT.def().help(wrap!(
-                    "Source address for claiming rewards for a bond. For \
-                     self-bonds, the validator is also the source."
-                )))
+                .arg(SOURCE.def().help(wrap!("Source address.")))
+                .arg(
+                    AMOUNT.def().help(wrap!("The amount to claim in decimal.")),
+                )
         }
     }
 

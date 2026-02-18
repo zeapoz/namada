@@ -1873,7 +1873,7 @@ pub async fn build_claim_airdrop(
             .await
             .expect("expected to validate amount");
 
-    let data = airdrop::AirdropClaim {
+    let data = airdrop::ClaimAirdrop {
         target: source.clone(),
         token,
         amount: validated_amount.amount(),

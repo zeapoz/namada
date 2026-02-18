@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
     Serialize,
     Deserialize,
 )]
-pub struct AirdropClaim {
+pub struct ClaimAirdrop {
     /// The target of the airdrop.
     pub target: Address,
     /// Token address to claim.
@@ -39,8 +39,8 @@ pub mod tests {
             target in arb_non_internal_address(),
             token in arb_non_internal_address(),
             amount in arb_amount(),
-        ) -> AirdropClaim {
-            AirdropClaim { target, token, amount  }
+        ) -> ClaimAirdrop {
+            ClaimAirdrop { target, token, amount  }
         }
     }
 }
