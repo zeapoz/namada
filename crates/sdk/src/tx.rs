@@ -1861,13 +1861,12 @@ pub async fn build_claim_airdrop(
     )
     .await?;
 
-    // TODO?: Check that the source address exists on chain
-
-    // TODO?: Check that amount > 0
+    // Check that the source address exists on chain
+    let source =
+        source_exists_or_err(source.clone(), tx_args.force, context).await?;
 
     // validate the amount given
     let token = context.native_token();
-
     let validated_amount =
         validate_amount(context, *amount, &token, tx_args.force)
             .await

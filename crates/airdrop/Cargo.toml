@@ -1,0 +1,16 @@
+[package]
+name = "namada_airdrop"
+description = "Airdrop functionality for Namada"
+edition = "2024"
+keywords = ["blockchain", "privacy", "crypto", "protocol", "network"]
+license = "MIT"
+version = "0.251.0"
+rust-version = "1.85"
+
+[dependencies]
+namada_core.workspace = true
+namada_tx.workspace = true
+namada_trans_token.workspace = true
+namada_vp_env.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
