@@ -1841,6 +1841,7 @@ pub async fn build_claim_airdrop(
         tx: tx_args,
         source,
         amount,
+        message,
         tx_code_path,
     }: &args::ClaimAirdrop,
 ) -> Result<(Tx, SigningData)> {
@@ -1876,6 +1877,7 @@ pub async fn build_claim_airdrop(
         target: source.clone(),
         token,
         amount: validated_amount.amount(),
+        message: message.clone(),
     };
 
     build(

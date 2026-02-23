@@ -3629,6 +3629,7 @@ pub mod args {
         arg_default("max-concurrent-fetches", DefaultFn(|| 100));
     pub const MAX_ETH_GAS: ArgOpt<u64> = arg_opt("max_eth-gas");
     pub const MEMO_OPT: ArgOpt<String> = arg_opt("memo");
+    pub const MESSAGE: Arg<String> = arg("message");
     pub const MIGRATION_PATH: ArgOpt<PathBuf> = arg_opt("migration-path");
     pub const MINIMUM_AMOUNT: ArgOpt<token::DenominatedAmount> =
         arg_opt("minimum-amount");
@@ -6620,6 +6621,7 @@ pub mod args {
                 tx,
                 source: chain_ctx.get(&self.source),
                 amount: self.amount,
+                message: self.message,
                 tx_code_path: self.tx_code_path.to_path_buf(),
             })
         }
@@ -6631,11 +6633,13 @@ pub mod args {
             let source = SOURCE.parse(matches);
             let raw_amount = AMOUNT.parse(matches);
             let amount = InputAmount::Unvalidated(raw_amount);
+            let message = MESSAGE.parse(matches);
             let tx_code_path = PathBuf::from(TX_CLAIM_AIRDROP_WASM);
             Self {
                 tx,
                 source,
                 amount,
+                message,
                 tx_code_path,
             }
         }
@@ -6646,6 +6650,9 @@ pub mod args {
                 .arg(
                     AMOUNT.def().help(wrap!("The amount to claim in decimal.")),
                 )
+                .arg(MESSAGE.def().help(wrap!(
+                    "Message containing the nullifier for the airdrop claim."
+                )))
         }
     }
 

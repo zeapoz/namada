@@ -54,8 +54,6 @@ pub const MASP_TOTAL_REWARDS: &str = "max_total_rewards";
 pub const MASP_REWARD_PRECISION_KEY: &str = "reward_precision";
 /// The key for the base native precision
 pub const MASP_BASE_NATIVE_PRECISION_KEY: &str = "base_native_precision";
-/// The key for the airdrop nullifiers.
-pub const AIRDROP_NULLIFIERS_KEY: &str = "airdrop_nullifiers";
 
 /// Obtain the nominal proportional key for the given token
 pub fn masp_kp_gain_key<TransToken: trans_token::Keys>(
@@ -308,15 +306,6 @@ pub fn is_masp_conversion_key(
     }
 }
 
-/// Check if the given storage key is an airdrop nullifier key
-pub fn is_airdrop_nullifier_key(key: &storage::Key) -> bool {
-    matches!(&key.segments[..],
-    [DbKeySeg::AddressSeg(addr),
-             DbKeySeg::StringSeg(prefix),
-             DbKeySeg::StringSeg(_nullifier),
-        ] if *addr == address::MASP && prefix == AIRDROP_NULLIFIERS_KEY)
-}
-
 /// Get a key for a masp nullifier
 pub fn masp_nullifier_key(nullifier: &Nullifier) -> storage::Key {
     storage::Key::from(address::MASP.to_db_key())
@@ -397,14 +386,5 @@ pub fn masp_assets_hash_key() -> storage::Key {
 pub fn masp_total_rewards() -> storage::Key {
     storage::Key::from(address::MASP.to_db_key())
         .push(&MASP_TOTAL_REWARDS.to_owned())
-        .expect("Cannot obtain a storage key")
-}
-
-/// Get a key for an airdrop nullifier
-pub fn airdrop_nullifier_key(nullifier: &Nullifier) -> storage::Key {
-    storage::Key::from(address::MASP.to_db_key())
-        .push(&AIRDROP_NULLIFIERS_KEY.to_owned())
-        .expect("Cannot obtain a storage key")
-        .push(&Hash(nullifier.0))
         .expect("Cannot obtain a storage key")
 }

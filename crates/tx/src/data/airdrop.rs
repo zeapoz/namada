@@ -22,6 +22,8 @@ pub struct ClaimAirdrop {
     pub token: Address,
     /// Amount to claim.
     pub amount: Amount,
+    /// Message containing the nullifier (unchecked).
+    pub message: String,
 }
 
 #[cfg(any(test, feature = "testing"))]
@@ -39,8 +41,9 @@ pub mod tests {
             target in arb_non_internal_address(),
             token in arb_non_internal_address(),
             amount in arb_amount(),
+            message in "[a-zA-Z0-9]{1,64}",
         ) -> ClaimAirdrop {
-            ClaimAirdrop { target, token, amount  }
+            ClaimAirdrop { target, token, amount, message }
         }
     }
 }

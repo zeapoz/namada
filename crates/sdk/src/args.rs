@@ -1901,6 +1901,8 @@ pub struct ClaimAirdrop<C: NamadaTypes = SdkTypes> {
     pub source: C::Address,
     /// Amount to claim
     pub amount: InputAmount,
+    /// Message containing the nullifier
+    pub message: String,
     /// Path to the TX WASM code file
     pub tx_code_path: PathBuf,
 }

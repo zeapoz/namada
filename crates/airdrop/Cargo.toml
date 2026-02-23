@@ -9,6 +9,7 @@ rust-version = "1.85"
 
 [dependencies]
 namada_core.workspace = true
+namada_storage.workspace = true
 namada_tx.workspace = true
 namada_trans_token.workspace = true
 namada_vp_env.workspace = true

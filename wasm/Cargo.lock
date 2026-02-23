@@ -4652,6 +4652,7 @@ name = "namada_airdrop"
 version = "0.251.0"
 dependencies = [
  "namada_core",
+ "namada_storage",
  "namada_trans_token",
  "namada_tx",
  "namada_vp_env",
@@ -5201,6 +5202,7 @@ version = "0.251.0"
 dependencies = [
  "borsh",
  "namada_account",
+ "namada_airdrop",
  "namada_core",
  "namada_events",
  "namada_gas",

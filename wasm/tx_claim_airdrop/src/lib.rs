@@ -8,7 +8,7 @@ fn apply_tx(ctx: &mut Ctx, tx_data: BatchedTx) -> TxResult {
     let claim = transaction::airdrop::ClaimAirdrop::try_from_slice(&data[..])
         .wrap_err("Failed to decode ClaimAirdrop value")?;
 
-    ctx.claim_airdrop(&claim.target, &claim.token, claim.amount)
+    ctx.claim_airdrop(&claim.target, &claim.token, claim.amount, claim.message)
         .wrap_err("Failed to claim airdrop")?;
 
     Ok(())

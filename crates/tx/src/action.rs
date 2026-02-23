@@ -86,6 +86,8 @@ pub enum AirdropAction {
         target: Address,
         /// Amount to claim
         amount: Amount,
+        /// Message containing the nullifier
+        message: String,
     },
 }
 
