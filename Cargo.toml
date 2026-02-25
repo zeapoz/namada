@@ -64,7 +64,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/namada-net/namada"
 version = "0.251.0"
-rust-version = "1.85" # MSRV
+rust-version = "1.88.0"
 
 [workspace.dependencies]
 namada_account = { version = "0.251.0", path = "crates/account" }
@@ -277,8 +277,17 @@ wasmtimer = "0.4"
 winapi = "0.3"
 xorf = { version = "0.11", features = ["serde"] }
 yansi = "1.0"
+# zair-sapling-proofs = { package = "zair-sapling-proofs", git = "https://github.com/eigerco/zcash-namada-airdrop", branch = "orchard-proofs" }
+# zair-orchard-proofs = { package = "zair-orchard-proofs", git = "https://github.com/eigerco/zcash-namada-airdrop", branch = "orchard-proofs" }
+zair-sapling-proofs = { path = "../zcash-namada-airdrop/crates/zair-sapling-proofs" }
+zair-orchard-proofs = { path = "../zcash-namada-airdrop/crates/zair-orchard-proofs" }
 zeroize = { version = "1.5", features = ["zeroize_derive"] }
 zstd = "0.13"
+
+# [patch.crates-io]
+# halo2_gadgets = { path = "../zcash-namada-airdrop/vendor/halo2_gadgets" }
+# orchard = { path = "../zcash-namada-airdrop/vendor/orchard" }
+# sapling-crypto = { path = "../zcash-namada-airdrop/vendor/sapling-crypto" }
 
 [profile.release]
 lto = true

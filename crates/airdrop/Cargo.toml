@@ -15,3 +15,6 @@ namada_trans_token.workspace = true
 namada_vp_env.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
+
+zair-sapling-proofs.workspace = true
+zair-orchard-proofs.workspace = true
