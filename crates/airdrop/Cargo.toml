@@ -8,6 +8,9 @@ version = "0.251.0"
 rust-version = "1.85"
 
 [dependencies]
+bellman.workspace = true
+bls12_381.workspace = true
+hex.workspace = true
 namada_core.workspace = true
 namada_storage.workspace = true
 namada_tx.workspace = true

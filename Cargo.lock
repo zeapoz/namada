@@ -3580,8 +3580,6 @@ dependencies = [
 [[package]]
 name = "halo2_gadgets"
 version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73a5e510d58a07d8ed238a5a8a436fe6c2c79e1bb2611f62688bc65007b4e6e7"
 dependencies = [
  "arrayvec",
  "bitvec",
@@ -5864,6 +5862,9 @@ dependencies = [
 name = "namada_airdrop"
 version = "0.251.0"
 dependencies = [
+ "bellman",
+ "bls12_381",
+ "hex",
  "namada_core",
  "namada_storage",
  "namada_trans_token",
@@ -7275,8 +7276,6 @@ checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 [[package]]
 name = "orchard"
 version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1ef66fcf99348242a20d582d7434da381a867df8dc155b3a980eca767c56137"
 dependencies = [
  "aes",
  "bitvec",
@@ -12323,3 +12322,7 @@ dependencies = [
  "cc",
  "pkg-config",
 ]
+
+[[patch.unused]]
+name = "sapling-crypto"
+version = "0.5.0"

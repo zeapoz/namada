@@ -3443,6 +3443,7 @@ pub mod args {
     use namada_sdk::storage::{self, BlockHeight, Epoch};
     use namada_sdk::time::DateTimeUtc;
     use namada_sdk::token::NATIVE_MAX_DECIMAL_PLACES;
+    use namada_sdk::tx::action::AirdropClaimData;
     use namada_sdk::tx::data::GasLimit;
     pub use namada_sdk::tx::{
         TX_BECOME_VALIDATOR_WASM, TX_BOND_WASM, TX_BRIDGE_POOL_WASM,
@@ -3630,6 +3631,7 @@ pub mod args {
     pub const MAX_ETH_GAS: ArgOpt<u64> = arg_opt("max_eth-gas");
     pub const MEMO_OPT: ArgOpt<String> = arg_opt("memo");
     pub const MESSAGE: Arg<String> = arg("message");
+    pub const CLAIM_DATA_FILE: Arg<PathBuf> = arg("message-file");
     pub const MIGRATION_PATH: ArgOpt<PathBuf> = arg_opt("migration-path");
     pub const MINIMUM_AMOUNT: ArgOpt<token::DenominatedAmount> =
         arg_opt("minimum-amount");
@@ -6621,7 +6623,7 @@ pub mod args {
                 tx,
                 source: chain_ctx.get(&self.source),
                 amount: self.amount,
-                message: self.message,
+                claim_data_file: self.claim_data_file,
                 tx_code_path: self.tx_code_path.to_path_buf(),
             })
         }
@@ -6633,13 +6635,13 @@ pub mod args {
             let source = SOURCE.parse(matches);
             let raw_amount = AMOUNT.parse(matches);
             let amount = InputAmount::Unvalidated(raw_amount);
-            let message = MESSAGE.parse(matches);
+            let claim_data_file = CLAIM_DATA_FILE.parse(matches);
             let tx_code_path = PathBuf::from(TX_CLAIM_AIRDROP_WASM);
             Self {
                 tx,
                 source,
                 amount,
-                message,
+                claim_data_file,
                 tx_code_path,
             }
         }
@@ -6650,8 +6652,8 @@ pub mod args {
                 .arg(
                     AMOUNT.def().help(wrap!("The amount to claim in decimal.")),
                 )
-                .arg(MESSAGE.def().help(wrap!(
-                    "Message containing the nullifier for the airdrop claim."
+                .arg(CLAIM_DATA_FILE.def().help(wrap!(
+                    "Path to JSON file containing the airdrop claim data with ZK proof."
                 )))
         }
     }

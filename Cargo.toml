@@ -113,6 +113,8 @@ ark-serialize = {version = "0.5"}
 ark-std = "0.5"
 arse-merkle-tree = {package = "nam-sparse-merkle-tree", version = "0.3.3-nam.0", default-features = false, features = ["std", "borsh"]}
 assert_cmd = "2.0"
+bellman = "0.14"
+bls12_381 = "0.8"
 assert_matches = "1.5"
 async-trait = {version = "0.1"}
 base58 = "0.2"
@@ -165,6 +167,7 @@ futures = "0.3"
 getrandom = "0.3"
 git2 = { version = "0.20", default-features = false }
 group = { version = "0.13.0", default-features = false }
+hex = "0.4"
 hyper = { version = "1.6", features = ["full"] }
 ibc = { version = "0.57.0", features = ["serde"] }
 ibc-derive = "0.10.1"
@@ -277,17 +280,15 @@ wasmtimer = "0.4"
 winapi = "0.3"
 xorf = { version = "0.11", features = ["serde"] }
 yansi = "1.0"
-# zair-sapling-proofs = { package = "zair-sapling-proofs", git = "https://github.com/eigerco/zcash-namada-airdrop", branch = "orchard-proofs" }
-# zair-orchard-proofs = { package = "zair-orchard-proofs", git = "https://github.com/eigerco/zcash-namada-airdrop", branch = "orchard-proofs" }
 zair-sapling-proofs = { path = "../zcash-namada-airdrop/crates/zair-sapling-proofs" }
 zair-orchard-proofs = { path = "../zcash-namada-airdrop/crates/zair-orchard-proofs" }
 zeroize = { version = "1.5", features = ["zeroize_derive"] }
 zstd = "0.13"
 
-# [patch.crates-io]
-# halo2_gadgets = { path = "../zcash-namada-airdrop/vendor/halo2_gadgets" }
-# orchard = { path = "../zcash-namada-airdrop/vendor/orchard" }
-# sapling-crypto = { path = "../zcash-namada-airdrop/vendor/sapling-crypto" }
+[patch.crates-io]
+halo2_gadgets = { path = "../zcash-namada-airdrop/vendor/halo2_gadgets" }
+orchard = { path = "../zcash-namada-airdrop/vendor/orchard" }
+sapling-crypto = { path = "../zcash-namada-airdrop/vendor/sapling-crypto" }
 
 [profile.release]
 lto = true

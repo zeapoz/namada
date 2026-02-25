@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::fs::File;
+use std::fs::{self, File};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -67,6 +67,7 @@ use namada_token::DenominatedAmount;
 use namada_token::masp::shielded_wallet::ShieldedApi;
 use namada_token::masp::{MaspFeeData, MaspTransferData, ShieldedTransfer};
 use namada_token::storage_key::balance_key;
+use namada_tx::action::AirdropClaimData;
 use namada_tx::data::pgf::UpdateStewardCommission;
 use namada_tx::data::pos::{BecomeValidator, ConsensusKeyChange};
 use namada_tx::data::{
@@ -1841,7 +1842,7 @@ pub async fn build_claim_airdrop(
         tx: tx_args,
         source,
         amount,
-        message,
+        claim_data_file,
         tx_code_path,
     }: &args::ClaimAirdrop,
 ) -> Result<(Tx, SigningData)> {
@@ -1866,6 +1867,13 @@ pub async fn build_claim_airdrop(
     let source =
         source_exists_or_err(source.clone(), tx_args.force, context).await?;
 
+    // Read the claim data file.
+    let claim_data: AirdropClaimData = serde_json::from_str(
+        &fs::read_to_string(&claim_data_file)
+            .expect("Failed to open the provided file to the claim data"),
+    )
+    .map_err(|e| Error::Other(format!("Error reading claim data file: {e}")))?;
+
     // validate the amount given
     let token = context.native_token();
     let validated_amount =
@@ -1877,7 +1885,7 @@ pub async fn build_claim_airdrop(
         target: source.clone(),
         token,
         amount: validated_amount.amount(),
-        message: message.clone(),
+        claim_data: claim_data.clone(),
     };
 
     build(

@@ -4,6 +4,7 @@ use namada_airdrop::storage::reveal_nullifier;
 use namada_core::address::{Address, InternalAddress};
 use namada_core::token::Amount;
 use namada_token;
+use namada_tx::action::AirdropClaimData;
 use namada_tx::action::{Action, AirdropAction, Write};
 
 use super::*;
@@ -15,17 +16,17 @@ impl Ctx {
         target: &Address,
         token_addr: &Address,
         amount: Amount,
-        message: String,
+        claim_data: AirdropClaimData,
     ) -> TxResult {
         self.insert_verifier(&Address::Internal(InternalAddress::Airdrop))?;
         self.insert_verifier(target)?;
 
-        reveal_nullifier(self, &message)?;
+        reveal_nullifier(self, &claim_data.airdrop_nullifier)?;
 
         self.push_action(Action::Airdrop(AirdropAction::Claim {
             target: target.clone(),
             amount,
-            message,
+            claim_data,
         }))?;
 
         // Mint tokens with Airdrop as minter
