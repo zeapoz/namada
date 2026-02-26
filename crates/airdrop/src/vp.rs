@@ -7,12 +7,12 @@ use bellman::groth16;
 use namada_core::address::Address;
 use namada_core::storage::Key;
 use namada_tx::BatchedTxRef;
-use namada_tx::action::AirdropClaimData;
-use namada_tx::action::{Action, AirdropAction};
+use namada_tx::action::{Action, AirdropAction, AirdropClaimData};
 use namada_vp_env::{Error, Result, VpEnv};
 use thiserror::Error;
-use zair_sapling_proofs::verifier::ValueCommitmentScheme;
-use zair_sapling_proofs::verifier::verify_claim_proof_bytes;
+use zair_sapling_proofs::verifier::{
+    ValueCommitmentScheme, verify_claim_proof_bytes,
+};
 
 use crate::storage_key::{
     airdrop_nullifier_key, is_airdrop_nullifier_key,
@@ -42,6 +42,8 @@ pub enum VpError {
     MissingNullifierGapRoot,
     #[error("Missing sapling value commitment scheme in storage")]
     MissingValueCommitmentScheme,
+    #[error("Invalid verifier key: {0}")]
+    InvalidVerifierKey(String),
     #[error("Invalid hex encoding: {0}")]
     InvalidHex(String),
     #[error("Invalid value commitment scheme: {0}")]
@@ -85,22 +87,22 @@ where
                     return Err(VpError::Unauthorized(target.clone()).into());
                 }
 
-                let nullifier = &claim_data.airdrop_nullifier;
-                let nullifier_key = airdrop_nullifier_key(nullifier);
+                let nullifier = claim_data.airdrop_nullifier;
+                let nullifier_key = airdrop_nullifier_key(&nullifier);
 
                 // Check if nullifier has already been used before.
                 if ctx.has_key_pre(&nullifier_key)? {
-                    return Err(VpError::NullifierAlreadyUsed(
-                        nullifier.clone(),
-                    )
+                    return Err(VpError::NullifierAlreadyUsed(hex::encode(
+                        nullifier,
+                    ))
                     .into());
                 }
 
                 // Check if nullifier has already been used in this transaction.
-                if claimed_nullifiers.contains(nullifier) {
-                    return Err(VpError::NullifierAlreadyUsed(
-                        nullifier.clone(),
-                    )
+                if claimed_nullifiers.contains(&nullifier) {
+                    return Err(VpError::NullifierAlreadyUsed(hex::encode(
+                        nullifier,
+                    ))
                     .into());
                 }
 
@@ -109,10 +111,10 @@ where
                     .then_some(())
                     .ok_or(VpError::NullifierNotCommitted)?;
 
-                // ZK Proof verification
+                // Verify the ZK proof.
                 verify_zk_proof(ctx, claim_data)?;
 
-                claimed_nullifiers.insert(nullifier.clone());
+                claimed_nullifiers.insert(nullifier);
             }
         }
 
@@ -149,33 +151,30 @@ where
 {
     // Read verifying key from storage.
     let vk_bytes: Vec<u8> = ctx
-        .read_bytes_post(&sapling_verifying_key())?
+        .read_bytes_pre(&sapling_verifying_key())?
         .ok_or(VpError::MissingVerifyingKey)?;
 
-    let vk = groth16::VerifyingKey::read(&vk_bytes[..]).map_err(|e| {
-        VpError::ZkProofVerificationFailed(format!("VK deserialization: {e}"))
-    })?;
+    let vk = groth16::VerifyingKey::read(&vk_bytes[..])
+        .map_err(|e| VpError::InvalidVerifierKey(e.to_string()))?;
     let pvk = groth16::prepare_verifying_key(&vk);
 
     // Read note commitment root from storage.
     let note_commitment_root_bytes: [u8; 32] = ctx
-        .read_bytes_post(&sapling_note_commitment_root_key())?
+        .read_bytes_pre(&sapling_note_commitment_root_key())?
         .ok_or(VpError::MissingNoteCommitmentRoot)?
         .try_into()
         .map_err(|_| VpError::InvalidHex("note_commitment_root".into()))?;
 
     // Read nullifier gap root from storage.
     let nullifier_gap_root_bytes: [u8; 32] = ctx
-        .read_bytes_post(&sapling_nullifier_gap_root_key())?
+        .read_bytes_pre(&sapling_nullifier_gap_root_key())?
         .ok_or(VpError::MissingNullifierGapRoot)?
         .try_into()
         .map_err(|_| VpError::InvalidHex("nullifier_gap_root".into()))?;
 
     // Read value commitment scheme from storage.
     let scheme_bytes: u8 = ctx
-        .read_bytes_post(&sapling_value_commitment_scheme_key())?
-        .ok_or(VpError::MissingValueCommitmentScheme)?
-        .pop()
+        .read_pre(&sapling_value_commitment_scheme_key())?
         .ok_or(VpError::MissingValueCommitmentScheme)?;
 
     let scheme = match scheme_bytes {
@@ -188,43 +187,19 @@ where
         }
     };
 
-    // Parse hex strings to byte arrays.
-    let zkproof: [u8; 192] = hex_decode(&claim_data.zkproof)?;
-    let rk: [u8; 32] = hex_decode(&claim_data.rk)?;
-    let cv: Option<[u8; 32]> =
-        claim_data.cv.as_ref().map(|v| hex_decode(v)).transpose()?;
-    let cv_sha256: Option<[u8; 32]> = claim_data
-        .cv_sha256
-        .as_ref()
-        .map(|v| hex_decode(v))
-        .transpose()?;
-    let airdrop_nullifier: [u8; 32] =
-        hex_decode(&claim_data.airdrop_nullifier)?;
-
     // Finally, verify the proof.
     verify_claim_proof_bytes(
         &pvk,
-        &zkproof,
+        &claim_data.zkproof,
         scheme,
-        &rk,
-        cv.as_ref(),
-        cv_sha256.as_ref(),
+        &claim_data.rk,
+        claim_data.cv.as_ref(),
+        claim_data.cv_sha256.as_ref(),
         &note_commitment_root_bytes,
-        &airdrop_nullifier,
+        &claim_data.airdrop_nullifier,
         &nullifier_gap_root_bytes,
     )
     .map_err(|e| VpError::ZkProofVerificationFailed(e.to_string()))?;
 
     Ok(())
-}
-
-/// Decode a hex string to a fixed-size byte array.
-fn hex_decode<const N: usize>(hex: &str) -> Result<[u8; N]> {
-    let bytes = hex::decode(hex)
-        .map_err(|e| VpError::InvalidHex(format!("{}: {}", hex, e)))?;
-    let bytes_len = bytes.len();
-    let array: [u8; N] = bytes.try_into().map_err(|_| {
-        VpError::InvalidHex(format!("expected {} bytes, got {}", N, bytes_len))
-    })?;
-    Ok(array)
 }

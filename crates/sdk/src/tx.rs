@@ -1842,7 +1842,7 @@ pub async fn build_claim_airdrop(
         tx: tx_args,
         source,
         amount,
-        claim_data_file,
+        claim_data_path,
         tx_code_path,
     }: &args::ClaimAirdrop,
 ) -> Result<(Tx, SigningData)> {
@@ -1869,7 +1869,7 @@ pub async fn build_claim_airdrop(
 
     // Read the claim data file.
     let claim_data: AirdropClaimData = serde_json::from_str(
-        &fs::read_to_string(&claim_data_file)
+        &fs::read_to_string(&claim_data_path)
             .expect("Failed to open the provided file to the claim data"),
     )
     .map_err(|e| Error::Other(format!("Error reading claim data file: {e}")))?;

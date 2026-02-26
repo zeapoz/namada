@@ -1902,7 +1902,7 @@ pub struct ClaimAirdrop<C: NamadaTypes = SdkTypes> {
     /// Amount to claim
     pub amount: InputAmount,
     /// Path to the claim data file with ZK proof
-    pub claim_data_file: PathBuf,
+    pub claim_data_path: PathBuf,
     /// Path to the TX WASM code file
     pub tx_code_path: PathBuf,
 }

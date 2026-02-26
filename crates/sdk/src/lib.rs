@@ -16,10 +16,10 @@ extern crate alloc;
 pub use namada_core::*;
 pub use {
     bip39, masp_primitives, masp_proofs, namada_account as account,
-    namada_gas as gas, namada_governance as governance, namada_ibc as ibc,
-    namada_parameters as parameters, namada_proof_of_stake as proof_of_stake,
-    namada_state as state, namada_storage as storage, namada_token as token,
-    tendermint_rpc, zeroize,
+    namada_airdrop, namada_gas as gas, namada_governance as governance,
+    namada_ibc as ibc, namada_parameters as parameters,
+    namada_proof_of_stake as proof_of_stake, namada_state as state,
+    namada_storage as storage, namada_token as token, tendermint_rpc, zeroize,
 };
 
 pub mod eth_bridge;
@@ -539,12 +539,12 @@ pub trait Namada: NamadaIo {
         &self,
         source: Address,
         amount: InputAmount,
-        claim_data_file: PathBuf,
+        claim_data_path: PathBuf,
     ) -> args::ClaimAirdrop {
         args::ClaimAirdrop {
             source,
             amount,
-            claim_data_file,
+            claim_data_path,
             tx_code_path: PathBuf::from(TX_CLAIM_AIRDROP_WASM),
             tx: self.tx_builder(),
         }

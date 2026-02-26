@@ -48,8 +48,10 @@ prost.workspace = true
 rand_core = { workspace = true, features = ["getrandom"] }
 serde.workspace = true
 serde_json.workspace = true
+serde_with.workspace = true
 sha2.workspace = true
 thiserror.workspace = true
+zair-core.workspace = true
 
 [dev-dependencies]
 namada_core = { path = "../core", features = ["testing"] }

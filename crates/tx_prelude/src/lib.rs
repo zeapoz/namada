@@ -78,18 +78,18 @@ pub fn log_string<T: AsRef<str>>(msg: T) {
 /// In non-WASM target, the message is simply printed out to stdout.
 #[macro_export]
 macro_rules! debug_log {
-    ($($arg:tt)*) => {{
-        (
-            if cfg!(target_arch = "wasm32") {
-                if cfg!(debug_assertions)
-                {
-                    log_string(format!($($arg)*));
-                }
-            } else {
-                println!($($arg)*);
+($($arg:tt)*) => {{
+    (
+        if cfg!(target_arch = "wasm32") {
+            if cfg!(debug_assertions)
+            {
+                log_string(format!($($arg)*));
             }
-        )
-    }};
+        } else {
+            println!($($arg)*);
+        }
+    )
+}};
 }
 
 /// Execution context provides access to the host environment functions

@@ -2,8 +2,12 @@ use namada_core::address::Address;
 use namada_core::borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use namada_core::token::Amount;
 use serde::{Deserialize, Serialize};
+use serde_with::hex::Hex;
+use serde_with::serde_as;
+use zair_core::base::ReversedHex;
 
 /// Airdrop claim data containing ZK proof information.
+#[serde_as]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 #[derive(
     Debug,
@@ -13,21 +17,27 @@ use serde::{Deserialize, Serialize};
     BorshDeserialize,
     BorshSchema,
     Serialize,
-    Deserialize
+    Deserialize,
 )]
 pub struct AirdropClaimData {
-    /// The Groth16 proof (192 bytes as hex string)
-    pub zkproof: String,
-    /// The re-randomized spend verification key (32 bytes as hex string)
-    pub rk: String,
-    /// Native value commitment (32 bytes as hex string), required for native scheme
+    /// The Groth16 proof (192 bytes)
+    #[serde_as(as = "Hex")]
+    pub zkproof: [u8; 192],
+    /// The re-randomized spend verification key (rk)
+    #[serde_as(as = "Hex")]
+    pub rk: [u8; 32],
+    /// The native value commitment (cv), if the scheme is `native`.
+    #[serde_as(as = "Option<Hex>")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cv: Option<String>,
-    /// SHA-256 value commitment (32 bytes as hex string), required for sha256 scheme
+    pub cv: Option<[u8; 32]>,
+    /// The SHA-256 value commitment (`cv_sha256`), if the scheme is `sha256`.
+    #[serde_as(as = "Option<Hex>")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cv_sha256: Option<String>,
-    /// The airdrop nullifier (32 bytes as hex string)
-    pub airdrop_nullifier: String,
+    pub cv_sha256: Option<[u8; 32]>,
+    /// The airdrop nullifier (airdrop-specific nullifier for double-claim
+    /// prevention).
+    #[serde_as(as = "ReversedHex")]
+    pub airdrop_nullifier: [u8; 32],
 }
 
 /// A tx data type to hold airdrop claim data.
@@ -58,6 +68,7 @@ pub struct ClaimAirdrop {
 pub mod tests {
     use namada_core::address::testing::arb_non_internal_address;
     use namada_core::token::testing::arb_amount;
+    use proptest::prelude::any;
     use proptest::prop_compose;
 
     use super::*;
@@ -65,10 +76,10 @@ pub mod tests {
     prop_compose! {
         /// Generate arbitrary airdrop claim data.
         pub fn arb_airdrop_claim_data()(
-            zkproof in "[0-9a-fA-F]{384}", // 192 bytes = 384 hex chars
-            rk in "[0-9a-fA-F]{64}",        // 32 bytes = 64 hex chars
-            cv in "[0-9a-fA-F]{64}",        // 32 bytes = 64 hex chars
-            airdrop_nullifier in "[0-9a-fA-F]{64}", // 32 bytes = 64 hex chars
+            zkproof in any::<[u8; 192]>(),
+            rk in any::<[u8; 32]>(),
+            cv in any::<[u8; 32]>(),
+            airdrop_nullifier in any::<[u8; 32]>(),
         ) -> AirdropClaimData {
             AirdropClaimData {
                 zkproof,
